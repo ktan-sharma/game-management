@@ -1,0 +1,45 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users collection - allow creation and reading for authentication
+    match /users/{userId} {
+      allow create: if true;  // Allow new user registration
+      allow read: if true;    // Allow reading user data for login
+      allow write: if false;  // Prevent modifications after creation
+    }
+    
+    // Games collection
+    match /games/{gameId} {
+      allow read: if true;
+      allow create, delete: if true;
+      allow update: if true && 
+        request.resource.data.keys().hasAll(['name', 'image']) &&
+        request.resource.data.name is string &&
+        request.resource.data.image is string;
+    }
+    
+    // Tables collection
+    match /tables/{tableId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Clients collection
+    match /clients/{clientId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Sessions collection
+    match /sessions/{sessionId} {
+      allow read: if true;
+      allow write: if true;
+    }
+    
+    // Balances collection
+    match /balances/{balanceId} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Management</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Initialize Firebase -->
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyABTtCoFCHv29N-PKBxFwlPmyImNEfxhBY",
+            authDomain: "game-management-8b6c5.firebaseapp.com",
+            projectId: "game-management-8b6c5",
+            storageBucket: "game-management-8b6c5.firebasestorage.app",
+            messagingSenderId: "424318590374",
+            appId: "1:424318590374:web:675d7563434fd871930367",
+            measurementId: "G-6CF0FCXTPT"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        window.db = firebase.firestore();
+    </script>
+    <script src="script.js"></script>
+</head>
+<body>
+    <div id="auth-container" class="auth-container">
+        <div class="auth-box">
+            <h2>Game Management Login</h2>
+            <div class="auth-form">
+                <input type="text" id="auth-username" placeholder="Username">
+                <input type="password" id="auth-password" placeholder="Password">
+                <div class="auth-buttons">
+                    <button id="login-btn">Login</button>
+                    <button id="register-btn">Register</button>
+                </div>
+                <p id="auth-error" class="error hidden"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container hidden" id="main-container">
+        <!-- Replace existing navbar section -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>Game Management</h1>
+            </div>
+            <div class="nav-links">
+                <a href="#" id="nav-home" class="nav-item">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+                <a href="#" id="nav-clients" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    Clients
+                </a>
+                <div class="nav-item dropdown">
+                    <a href="#" class="dropdown-trigger">
+                        <i class="fas fa-chart-bar"></i>
+                        Reports
+                        <i class="fas fa-chevron-down"></i>
+                    </a>
+                    <div class="dropdown-content">
+                        <a href="#" id="nav-payment-reports">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Payment Reports
+                        </a>
+                        <a href="#" id="nav-balance-reports">
+                            <i class="fas fa-balance-scale"></i>
+                            Balance Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="nav-profile">
+                <button id="logout-btn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </nav>
+
+        <!-- Replace existing homepage section -->
+        <section id="homepage" class="homepage">
+            <div class="page-header">
+                <h2>Game Dashboard</h2>
+                <button id="add-game-btn" class="primary-btn">
+                    <i class="fas fa-plus"></i> Add New Game
+                </button>
+            </div>
+            <div id="game-cards" class="game-cards"></div>
+            <div id="add-game-form" class="modal hidden">
+                <div class="modal-content">
+                    <h3>Add New Game</h3>
+                    <div class="form-group">
+                        <input type="text" id="new-game" placeholder="Game name">
+                    </div>
+                    <div class="form-group">
+                        <input type="url" id="new-game-image" placeholder="Image URL (optional)">
+                    </div>
+                    <div class="modal-buttons">
+                        <button id="submit-game" class="primary-btn">Add Game</button>
+                        <button id="cancel-game" class="secondary-btn">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Clients Page -->
+        <section id="clients-page" class="hidden">
+            <h2>Client Management</h2>
+            <button id="add-client-btn">Add New Client</button>
+            <div id="client-list" class="client-list"></div>
+        </section>
+
+        <!-- Add Client Modal -->
+        <div id="add-client-form" class="modal hidden">
+            <div class="modal-content">
+                <h3>Add New Client</h3>
+                <div class="form-group">
+                    <label for="new-client">Name *</label>
+                    <input type="text" id="new-client" required>
+                </div>
+                <div class="form-group">
+                    <label for="client-phone">Phone Number (Optional)</label>
+                    <input type="tel" id="client-phone" placeholder="Enter phone number">
+                </div>
+                <div class="modal-buttons">
+                    <button id="submit-client">Add</button>
+                    <button id="cancel-client">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Management Sections -->
+        <div id="game-pages"></div>
+
+        <!-- Payment Reports -->
+        <section id="payment-reports" class="hidden">
+            <h2>Payment Reports</h2>
+            <div class="report-controls">
+                <label>From: <input type="date" id="payment-from"></label>
+                <label>To: <input type="date" id="payment-to"></label>
+                <button id="generate-payment-report">Generate Report</button>
+            </div>
+            <p>Total Revenue: <span id="payment-revenue-total">0</span> ₹</p>
+            <div id="payment-history" class="report-table-container"></div>
+        </section>
+
+        <!-- Balance Reports -->
+        <section id="balance-reports" class="hidden">
+            <h2>Balance Reports</h2>
+            <div id="balance-history" class="report-table-container"></div>
+        </section>
+
+        <!-- Billing Window (Modal) -->
+        <div id="billing-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Billing Details</h3>
+                <p id="billing-client"></p>
+                <p id="billing-game"></p>
+                <p id="billing-table"></p>
+                <p id="billing-start"></p>
+                <p id="billing-end"></p>
+                <label>Payment Mode:
+                    <select id="billing-mode">
+                        <option value="Cash">Cash</option>
+                        <option value="GPay">GPay</option>
+                        <option value="Card">Card</option>
+                    </select>
+                </label>
+                <p>Amount: <span id="billing-amount"></span> ₹</p>
+                <label>Amount Paid: <input type="number" id="billing-paid" step="0.01" oninput="updateBalance()"></label>
+                <p>Balance: <span id="billing-balance">0.00</span> ₹</p>
+                <button id="confirm-payment">Confirm Payment</button>
+                <button id="close-billing">Close</button>
+            </div>
+        </div>
+
+        <!-- Best of 3 Modal (Modal) -->
+        <div id="best-of-3-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Set Players for Best of 3</h3>
+                <label>Player 1:
+                    <select id="best-of-3-player1"></select>
+                </label>
+                <label>Player 2:
+                    <select id="best-of-3-player2"></select>
+                </label>
+                <button id="confirm-best-of-3">Confirm</button>
+                <button id="cancel-best-of-3">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Image Edit Modal -->
+        <div id="edit-image-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Edit Game Image</h3>
+                <div class="image-input-group">
+                    <input type="text" id="edit-game-image" placeholder="Enter image URL">
+                    <div class="file-upload">
+                        <label for="image-file">Or upload image:</label>
+                        <input type="file" id="image-file" accept="image/*">
+                    </div>
+                </div>
+                <div class="modal-buttons">
+                    <button id="confirm-image-edit">Update</button>
+                    <button id="cancel-image-edit">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
